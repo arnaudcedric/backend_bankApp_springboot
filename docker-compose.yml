@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+
+  mysql_service:
+    image: mysql:8.0
+    container_name: mysql-bank
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: pepe0008
+      MYSQL_DATABASE: bank
+      MYSQL_USER: bankuser
+      MYSQL_PASSWORD: bankpass
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-ppepe0008" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  phegonbank:
+    image: ghcr.io/arnaudcedric/phegonbank:v2
+    container_name: phegonbank
+    env_file:
+      - .env
+
+    depends_on:
+      mysql_service:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+#    environment:
+#      LOCAL_DB_URL: jdbc:mysql://mysql_service:3306/bank
+#      LOCAL_DB_USERNAME: root
+#      LOCAL_DB_PASSWORD: pepe0008
+#      LOCAL_DB_USERNAME: bankuser
+#      LOCAL_DB_PASSWORD: bankpass
+#      PORT: 8080
+#      JWT_SECRET: cedricarnaud123456789phegon1234567890arstac12343214
+#      JWT_EXPIRATION_TIME: 2592000000
+#      MAIL_USER: ccanada2019@gmail.com
+#      MAIL_PASS: qjrrbqphmsxcignu
+#      AWS_ACCESS_KEY: YOUR_ACCESS_KEY
+#      AWS_SECRETE_KEY: YOUR_SECRET_KEY
+#      AWS_BUCKET_NAME: arnauds3
+    restart: unless-stopped
+
+  phegonbank-react:
+    image: ghcr.io/arnaudcedric/phegonbank-react:v1
+    container_name: phegonbank-react
+    depends_on:
+      - phegonbank
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
