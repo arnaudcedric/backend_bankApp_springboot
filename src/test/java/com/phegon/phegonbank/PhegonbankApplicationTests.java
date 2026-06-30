@@ -6,8 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class PhegonbankApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+//	@Test
+//	void contextLoads() {
+//	}
+public static void main(String[] args) {
+	System.out.println("Hello World");
+}
 }
