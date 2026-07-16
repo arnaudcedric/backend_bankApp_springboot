@@ -64,6 +64,7 @@ jobs:
         with:
           repository: ${{ env.GITOPS_REPO }}
           token: ${{ secrets.GITOPS_TOKEN }}
+          ref: main
           path: gitops
           fetch-depth: 0
 
