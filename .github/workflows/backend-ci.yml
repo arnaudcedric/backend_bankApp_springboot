@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  # pull_request:
-  #   branches:
-  #     - main
 
 permissions:
   contents: read
@@ -20,12 +17,10 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout Repository
+      - name: Checkout Backend Repository
         uses: actions/checkout@v4
 
       - name: Setup Java 21
@@ -71,16 +66,18 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Checkout GitOps repository
+
+      - name: Checkout GitOps Repository
         uses: actions/checkout@v4
         with:
           repository: ${{ env.GITOPS_REPO }}
           token: ${{ secrets.GITOPS_TOKEN }}
           path: gitops
           fetch-depth: 0
+
       - name: Configure Git Safe Directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE/gitops"
-          
+
       - name: Install yq
         uses: mikefarah/yq@v4.44.3
 
