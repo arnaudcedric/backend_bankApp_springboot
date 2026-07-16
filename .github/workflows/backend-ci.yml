@@ -75,24 +75,28 @@ jobs:
         uses: mikefarah/yq@v4.44.3
 
       - name: Update Backend Image Tag
+        shell: bash
         run: |
-          SHORT_SHA="${GITHUB_SHA::7}"
-          echo "SHA=$SHORT_SHA"
+          export SHORT_SHA="${GITHUB_SHA::7}"
 
-          yq -i '.backend.image.tag = strenv(SHORT_SHA)' gitops/${{ env.VALUES_FILE }}
+          echo "SHORT_SHA=$SHORT_SHA"
+
+          yq eval '.backend.image.tag = env(SHORT_SHA)' -i "gitops/${{ env.VALUES_FILE }}"
 
           echo "----- Updated file -----"
-          cat gitops/${{ env.VALUES_FILE }}
+          cat "gitops/${{ env.VALUES_FILE }}"
 
       - name: Commit and Push GitOps Changes
+        shell: bash
         run: |
           cd gitops
 
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add ${{ env.VALUES_FILE }}
+          git add "${{ env.VALUES_FILE }}"
 
-          git commit -m "Update backend image to ${GITHUB_SHA::7}" || echo "No changes to commit"
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
 
+          git commit -m "Update backend image to ${GITHUB_SHA::7}"
           git push
