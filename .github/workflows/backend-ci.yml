@@ -77,7 +77,12 @@ jobs:
       - name: Update Backend Image Tag
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
+          echo "SHA=$SHORT_SHA"
+
           yq -i '.backend.image.tag = strenv(SHORT_SHA)' gitops/${{ env.VALUES_FILE }}
+
+          echo "----- Updated file -----"
+          cat gitops/${{ env.VALUES_FILE }}
 
       - name: Commit and Push GitOps Changes
         run: |
