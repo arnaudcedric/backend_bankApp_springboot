@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
           cache: maven
 
       - name: Make Maven Wrapper Executable
@@ -35,6 +35,10 @@ jobs:
 
       - name: Run Unit Tests
         run: ./mvnw test
+
+      - name: Set Short SHA
+        shell: bash
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -54,7 +58,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/arnaudcedric/backend_bankapp_springboot:${{ github.sha }}
+            ghcr.io/arnaudcedric/backend_bankapp_springboot:${{ env.SHORT_SHA }}
             ghcr.io/arnaudcedric/backend_bankapp_springboot:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -77,9 +81,7 @@ jobs:
       - name: Update Backend Image Tag
         shell: bash
         run: |
-          export SHORT_SHA="${GITHUB_SHA::7}"
-
-          echo "SHORT_SHA=$SHORT_SHA"
+          echo "SHORT_SHA=${SHORT_SHA}"
 
           yq eval '.backend.image.tag = env(SHORT_SHA)' -i "gitops/${{ env.VALUES_FILE }}"
 
@@ -98,5 +100,5 @@ jobs:
 
           git diff --cached --quiet && echo "No changes to commit" && exit 0
 
-          git commit -m "Update backend image to ${GITHUB_SHA::7}"
+          git commit -m "Update backend image to ${SHORT_SHA}"
           git push
